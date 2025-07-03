@@ -1,4 +1,4 @@
-import React, { useState } from 'react';    // ← importe useState
+import React, { useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Modal,
   TextInput,
 } from 'react-native';
+import { useAppTheme } from '../hooks/useAppTheme';
 import { mockLista } from '../data/mockData';
 
 type ListType = {
@@ -18,16 +19,107 @@ type ListType = {
 };
 
 export default function HomeScreen() {
-  // ← defina aqui os estados que você estava usando
+  const theme = useAppTheme();
   const [modalVisible, setModalVisible] = useState(false);
   const [newListName, setNewListName] = useState('');
 
-  const handleCreateList = () => {
-    // aqui você chamaria sua API passando `newListName`
-    // depois limpa o campo e fecha o modal, por exemplo:
-    setNewListName('');
-    setModalVisible(false);
-  };
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          flex: 1,
+          padding: 16,
+          backgroundColor: theme.colors.background,
+        },
+        header: {
+          fontSize: 24,
+          fontWeight: 'bold',
+          color: theme.colors.heading,
+          marginBottom: 16,
+        },
+        button: {
+          backgroundColor: theme.colors.primary,
+          padding: 12,
+          borderRadius: 8,
+          marginBottom: 16,
+        },
+        buttonText: {
+          color: '#FFF',
+          textAlign: 'center',
+          fontWeight: '600',
+        },
+        listCard: {
+          backgroundColor: theme.colors.card,
+          padding: 16,
+          borderRadius: 8,
+          marginBottom: 12,
+          borderWidth: 1,
+          borderColor: theme.colors.border,
+          shadowColor: '#000',
+          shadowOpacity: 0.05,
+          shadowRadius: 10,
+          elevation: 2,
+        },
+        listName: {
+          fontSize: 18,
+          fontWeight: '600',
+          color: theme.colors.heading,
+          marginBottom: 4,
+        },
+        listProgress: {
+          fontSize: 14,
+          color: theme.colors.text,
+        },
+        modalOverlay: {
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          justifyContent: 'center',
+          padding: 24,
+        },
+        modalContent: {
+          backgroundColor: theme.colors.card,
+          borderRadius: 8,
+          padding: 16,
+        },
+        modalTitle: {
+          fontSize: 18,
+          fontWeight: 'bold',
+          color: theme.colors.heading,
+          marginBottom: 12,
+        },
+        input: {
+          borderWidth: 1,
+          borderColor: theme.colors.border,
+          borderRadius: 8,
+          padding: 8,
+          color: theme.colors.text,
+          backgroundColor: theme.colors.inputBackground,
+          marginBottom: 12,
+        },
+        createButton: {
+          backgroundColor: theme.colors.primary,
+          padding: 12,
+          borderRadius: 8,
+          marginBottom: 8,
+        },
+        createButtonText: {
+          color: '#FFF',
+          textAlign: 'center',
+        },
+        cancelText: {
+          color: theme.colors.primary,
+          textAlign: 'center',
+        },
+      }),
+    [theme],
+  );
+
+  const data: ListType[] = mockLista.map(item => ({
+    id: item.id,
+    name: item.nome,
+    total: 2,
+    bought: item.comprado ? 1 : 0,
+  }));
 
   function renderListItem({ item }: { item: ListType }) {
     const progress = (item.bought / item.total) * 100;
@@ -41,48 +133,35 @@ export default function HomeScreen() {
     );
   }
 
+  const handleCreateList = () => {
+    setNewListName('');
+    setModalVisible(false);
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Minhas Listas</Text>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => setModalVisible(true)}
-      >
+      <TouchableOpacity style={styles.button} onPress={() => setModalVisible(true)}>
         <Text style={styles.buttonText}>+ Criar Nova Lista</Text>
       </TouchableOpacity>
 
-      <FlatList
-        data={mockLista.map(item => ({
-          id: item.id,
-          name: item.nome,
-          total: 2,
-          bought: item.comprado ? 1 : 0,
-        }))}
-        keyExtractor={item => item.id}
-        renderItem={renderListItem}
-      />
+      <FlatList data={data} keyExtractor={item => item.id} renderItem={renderListItem} />
 
       <Modal visible={modalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
-              Criar Nova Lista de Compras
-            </Text>
+            <Text style={styles.modalTitle}>Criar Nova Lista de Compras</Text>
             <TextInput
               style={styles.input}
               placeholder="Ex: Compras da Semana, Viagem"
+              placeholderTextColor={theme.colors.placeholder}
               value={newListName}
               onChangeText={setNewListName}
             />
-            <TouchableOpacity
-              style={styles.createButton}
-              onPress={handleCreateList}
-            >
+            <TouchableOpacity style={styles.createButton} onPress={handleCreateList}>
               <Text style={styles.createButtonText}>Criar Lista</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setModalVisible(false)}
-            >
+            <TouchableOpacity onPress={() => setModalVisible(false)}>
               <Text style={styles.cancelText}>Cancelar</Text>
             </TouchableOpacity>
           </View>
@@ -91,54 +170,3 @@ export default function HomeScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#121212' },
-  header: { fontSize: 24, fontWeight: 'bold', color: '#fff', marginBottom: 16 },
-  button: { backgroundColor: '#ff8c65', padding: 12, borderRadius: 8, marginBottom: 16 },
-  buttonText: { color: '#fff', textAlign: 'center' },
-  listCard: {
-    backgroundColor: '#1e1e1e',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 12,
-  },
-  listName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 4,
-  },
-  listProgress: {
-    fontSize: 14,
-    color: '#ccc',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  modalContent: {
-    backgroundColor: '#1e1e1e',
-    borderRadius: 8,
-    padding: 16,
-  },
-  modalTitle: { fontSize: 18, fontWeight: 'bold', color: '#fff', marginBottom: 12 },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ff8c65',
-    borderRadius: 8,
-    padding: 8,
-    color: '#fff',
-    marginBottom: 12,
-  },
-  createButton: {
-    backgroundColor: '#ff8c65',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  createButtonText: { color: '#fff', textAlign: 'center' },
-  cancelText: { color: '#ff8c65', textAlign: 'center' },
-});

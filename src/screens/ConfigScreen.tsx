@@ -1,5 +1,4 @@
-// src/screens/ConfigScreen.tsx
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -8,90 +7,151 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
 } from 'react-native';
+import { ThemeContext, ThemeOption } from '../context/ThemeContext';
+import { useAppTheme } from '../hooks/useAppTheme';
+import Icon from 'react-native-vector-icons/Feather';
 
-type ThemeOption = 'light' | 'dark' | 'system';
+const labels: Record<ThemeOption, string> = {
+  light: 'Claro',
+  dark: 'Escuro',
+  system: 'Sistema',
+};
 
 export default function ConfigScreen() {
-  // estados iniciais (você pode carregar de um contexto ou AsyncStorage)
+  const { choice, setChoice } = useContext(ThemeContext);
+  const theme = useAppTheme();
+
+  // Apenas para demo; você pode integrar com AsyncStorage ou API
   const [displayName, setDisplayName] = useState('Usuario Exemplo');
-  const userEmail = 'usuarioteste@email.com';
-  const [theme, setTheme] = useState<ThemeOption>('light');
-
-  const saveProfile = () => {
-    // aqui você dispara sua API / Context / AsyncStorage
-    Alert.alert('Perfil salvo', `Nome de exibição: ${displayName}`);
-  };
-
-  const renderThemeButton = (option: ThemeOption, label: string) => (
-    <TouchableOpacity
-      key={option}
-      style={[
-        styles.themeButton,
-        theme === option && styles.themeButtonActive,
-      ]}
-      onPress={() => setTheme(option)}
-    >
-      <Text
-        style={[
-          styles.themeButtonText,
-          theme === option && styles.themeButtonTextActive,
-        ]}
-      >
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
+  const [userEmail] = useState('usuarioteste@email');
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.container}>
-        {/* Card 1: Perfil */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Suas Informações</Text>
-          <Text style={styles.cardSubtitle}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <ScrollView contentContainerStyle={{ padding: 16 }}>
+        {/* Card 1: Suas Informações */}
+        <View
+          style={[
+            styles.card,
+            {
+              backgroundColor: theme.colors.card,
+              borderColor: theme.colors.border,
+            },
+          ]}
+        >
+          <Text style={[styles.cardTitle, { color: theme.colors.heading }]}>
+            Suas Informações
+          </Text>
+          <Text style={[styles.cardSubtitle, { color: theme.colors.text }]}>
             Atualize seu nome de exibição. Seu e-mail não pode ser alterado aqui.
           </Text>
 
-          <Text style={styles.label}>Nome de Exibição</Text>
-          <View style={styles.inputWrapper}>
-            <TextInput
-              style={styles.input}
-              value={displayName}
-              onChangeText={setDisplayName}
-              placeholder="Seu nome"
-              placeholderTextColor="#888"
-            />
-          </View>
+          <Text style={[styles.label, { color: theme.colors.text }]}>
+            Nome de Exibição
+          </Text>
+          <TextInput
+            style={[
+              styles.input,
+              {
+                backgroundColor: theme.colors.inputBackground,
+                color: theme.colors.text,
+              },
+            ]}
+            value={displayName}
+            onChangeText={setDisplayName}
+            placeholder="Seu nome"
+            placeholderTextColor={theme.colors.placeholder}
+          />
 
-          <Text style={[styles.label, styles.labelMarginTop]}>Email</Text>
-          <View style={[styles.inputWrapper, styles.inputDisabled]}>
-            <TextInput
-              style={styles.input}
-              value={userEmail}
-              editable={false}
-              selectTextOnFocus={false}
-            />
-          </View>
+          <Text
+            style={[
+              styles.label,
+              { color: theme.colors.text, marginTop: 16 },
+            ]}
+          >
+            Email
+          </Text>
+          <TextInput
+            style={[
+              styles.input,
+              styles.inputDisabled,
+              {
+                backgroundColor: theme.colors.inputBackground,
+                color: theme.colors.text,
+              },
+            ]}
+            value={userEmail}
+            editable={false}
+          />
 
-          <TouchableOpacity style={styles.saveButton} onPress={saveProfile}>
-            <Text style={styles.saveButtonText}>Salvar Alterações de Perfil</Text>
+          <TouchableOpacity
+            style={[
+              styles.saveButton,
+              { backgroundColor: theme.colors.primary },
+            ]}
+            onPress={() => {
+              /* saveProfile() */
+            }}
+          >
+            <Text style={styles.saveButtonText}>
+              Salvar Alterações de Perfil
+            </Text>
           </TouchableOpacity>
         </View>
 
         {/* Card 2: Aparência */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Aparência</Text>
-          <Text style={styles.cardSubtitle}>
+        <View
+          style={[
+            styles.card,
+            {
+              backgroundColor: theme.colors.card,
+              borderColor: theme.colors.border,
+            },
+          ]}
+        >
+          <Text style={[styles.cardTitle, { color: theme.colors.heading }]}>
+            Aparência
+          </Text>
+          <Text style={[styles.cardSubtitle, { color: theme.colors.text }]}>
             Personalize a aparência do aplicativo.
           </Text>
 
-          <Text style={styles.label}>Tema</Text>
+          <Text style={[styles.label, { color: theme.colors.text }]}>Tema</Text>
           <View style={styles.themeRow}>
-            {renderThemeButton('light', 'Claro')}
-            {renderThemeButton('dark', 'Escuro')}
-            {renderThemeButton('system', 'Sistema')}
+            {(Object.keys(labels) as ThemeOption[]).map(option => (
+              <TouchableOpacity
+                key={option}
+                style={[
+                  styles.themeButton,
+                  choice === option && {
+                    backgroundColor: theme.colors.primary,
+                    borderColor: theme.colors.primary,
+                  },
+                ]}
+                onPress={() => setChoice(option)}
+              >
+                <Icon
+                  name={
+                    option === 'light'
+                      ? 'sun'
+                      : option === 'dark'
+                      ? 'moon'
+                      : 'sliders'
+                  }
+                  size={20}
+                  color={choice === option ? '#fff' : theme.colors.text}
+                  style={styles.iconMarginRight}
+                />
+                <Text
+                  style={[
+                    styles.themeButtonText,
+                    choice === option && { color: '#fff' },
+                  ]}
+                >
+                  {labels[option]}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
       </ScrollView>
@@ -100,59 +160,32 @@ export default function ConfigScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#121212' },
-  container: {
-    padding: 16,
-    backgroundColor: '#121212',
-  },
   card: {
-    backgroundColor: '#1e1e1e',
     borderRadius: 8,
     padding: 16,
     marginBottom: 24,
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
   },
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 4,
-  },
-  cardSubtitle: {
-    fontSize: 14,
-    color: '#ccc',
-    marginBottom: 12,
-  },
-  label: {
-    fontSize: 14,
-    color: '#ddd',
-    marginBottom: 6,
-  },
-  labelMarginTop: {
-    marginTop: 16,
-  },
-  inputWrapper: {
-    backgroundColor: '#2a2a2a',
-    borderRadius: 6,
-  },
+  cardTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 4 },
+  cardSubtitle: { fontSize: 14, marginBottom: 12 },
+  label: { fontSize: 14, marginBottom: 6 },
   input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 6,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    color: '#fff',
+    marginBottom: 12,
   },
   inputDisabled: {
     opacity: 0.6,
   },
-  saveButton: {
-    marginTop: 20,
-    backgroundColor: '#ff8c65',
-    paddingVertical: 12,
-    borderRadius: 6,
-  },
-  saveButtonText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontWeight: '600',
-  },
+  saveButton: { marginTop: 20, paddingVertical: 12, borderRadius: 6 },
+  saveButtonText: { color: '#fff', textAlign: 'center', fontWeight: '600' },
   themeRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -160,22 +193,14 @@ const styles = StyleSheet.create({
   },
   themeButton: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: 1,
     borderColor: '#444',
     borderRadius: 6,
-    paddingVertical: 10,
+    padding: 12,
     marginHorizontal: 4,
   },
-  themeButtonActive: {
-    backgroundColor: '#ff8c65',
-    borderColor: '#ff8c65',
-  },
-  themeButtonText: {
-    textAlign: 'center',
-    color: '#ccc',
-    fontWeight: '500',
-  },
-  themeButtonTextActive: {
-    color: '#fff',
-  },
+  themeButtonText: { flex: 1, textAlign: 'center', fontWeight: '500' },
+  iconMarginRight: { marginRight: 6 },
 });

@@ -1,5 +1,5 @@
 import React from 'react';
-import { createDrawerNavigator, DrawerNavigationOptions } from '@react-navigation/drawer';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import HomeScreen from '../screens/HomeScreen';
 import ConfigScreen from '../screens/ConfigScreen';
 
@@ -10,17 +10,17 @@ type DrawerParamList = {
 
 const Drawer = createDrawerNavigator<DrawerParamList>();
 
-const drawerScreenOptions: DrawerNavigationOptions = {
-  drawerLabelStyle: { fontSize: 16 },
-  drawerStyle: { backgroundColor: '#fff' },
-  drawerActiveTintColor: '#999999',
-};
+// const drawerScreenOptions: DrawerNavigationOptions = {
+//   drawerLabelStyle: { fontSize: 16 },
+//   drawerStyle: { backgroundColor: '#fff' },
+//   drawerActiveTintColor: '#999999',
+// };
 
 export default function AppNavigator() {
   return (
     <Drawer.Navigator
       initialRouteName="Home"
-      screenOptions={drawerScreenOptions} 
+      //screenOptions={drawerScreenOptions} 
     >
       <Drawer.Screen name="Home" component={HomeScreen} />
       <Drawer.Screen name="Config" component={ConfigScreen} />
