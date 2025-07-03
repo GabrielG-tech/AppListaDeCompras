@@ -1,3 +1,4 @@
+// src/screens/ConfigScreen.tsx
 import React, { useContext, useState } from 'react';
 import {
   SafeAreaView,
@@ -7,6 +8,7 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Appearance,
 } from 'react-native';
 import { ThemeContext, ThemeOption } from '../context/ThemeContext';
 import { useAppTheme } from '../hooks/useAppTheme';
@@ -22,21 +24,26 @@ export default function ConfigScreen() {
   const { choice, setChoice } = useContext(ThemeContext);
   const theme = useAppTheme();
 
-  // Apenas para demo; você pode integrar com AsyncStorage ou API
+  // Determina o tema efetivo (incluindo 'system')
+  const systemScheme = Appearance.getColorScheme();
+  const effective: ThemeOption =
+    choice === 'system' ? (systemScheme ?? 'light') : choice;
+
+  // Função para cor do texto dos botões
+  const buttonTextColor = (opt: ThemeOption) =>
+    effective === 'dark' || choice === opt ? '#fff' : theme.colors.text;
+
   const [displayName, setDisplayName] = useState('Usuario Exemplo');
   const [userEmail] = useState('usuarioteste@email');
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <ScrollView contentContainerStyle={{ padding: 16 }}>
-        {/* Card 1: Suas Informações */}
+        {/* Suas Informações */}
         <View
           style={[
             styles.card,
-            {
-              backgroundColor: theme.colors.card,
-              borderColor: theme.colors.border,
-            },
+            { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
           ]}
         >
           <Text style={[styles.cardTitle, { color: theme.colors.heading }]}>
@@ -52,10 +59,7 @@ export default function ConfigScreen() {
           <TextInput
             style={[
               styles.input,
-              {
-                backgroundColor: theme.colors.inputBackground,
-                color: theme.colors.text,
-              },
+              { backgroundColor: theme.colors.inputBackground, color: theme.colors.text },
             ]}
             value={displayName}
             onChangeText={setDisplayName}
@@ -63,21 +67,16 @@ export default function ConfigScreen() {
             placeholderTextColor={theme.colors.placeholder}
           />
 
-          <Text
-            style={[
-              styles.label,
-              { color: theme.colors.text, marginTop: 16 },
-            ]}
-          >
+          <Text style={[styles.label, { color: theme.colors.text, marginTop: 16 }]}>
             Email
           </Text>
           <TextInput
             style={[
               styles.input,
-              styles.inputDisabled,
               {
                 backgroundColor: theme.colors.inputBackground,
                 color: theme.colors.text,
+                opacity: 0.6,
               },
             ]}
             value={userEmail}
@@ -85,28 +84,20 @@ export default function ConfigScreen() {
           />
 
           <TouchableOpacity
-            style={[
-              styles.saveButton,
-              { backgroundColor: theme.colors.primary },
-            ]}
+            style={[styles.saveButton, { backgroundColor: theme.colors.primary }]}
             onPress={() => {
               /* saveProfile() */
             }}
           >
-            <Text style={styles.saveButtonText}>
-              Salvar Alterações de Perfil
-            </Text>
+            <Text style={styles.saveButtonText}>Salvar Alterações de Perfil</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Card 2: Aparência */}
+        {/* Aparência */}
         <View
           style={[
             styles.card,
-            {
-              backgroundColor: theme.colors.card,
-              borderColor: theme.colors.border,
-            },
+            { backgroundColor: theme.colors.card, borderColor: theme.colors.border },
           ]}
         >
           <Text style={[styles.cardTitle, { color: theme.colors.heading }]}>
@@ -139,15 +130,10 @@ export default function ConfigScreen() {
                       : 'sliders'
                   }
                   size={20}
-                  color={choice === option ? '#fff' : theme.colors.text}
+                  color={buttonTextColor(option)}
                   style={styles.iconMarginRight}
                 />
-                <Text
-                  style={[
-                    styles.themeButtonText,
-                    choice === option && { color: '#fff' },
-                  ]}
-                >
+                <Text style={[styles.themeButtonText, { color: buttonTextColor(option) }]}>
                   {labels[option]}
                 </Text>
               </TouchableOpacity>
@@ -181,16 +167,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginBottom: 12,
   },
-  inputDisabled: {
-    opacity: 0.6,
-  },
   saveButton: { marginTop: 20, paddingVertical: 12, borderRadius: 6 },
   saveButtonText: { color: '#fff', textAlign: 'center', fontWeight: '600' },
-  themeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 8,
-  },
+  themeRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
   themeButton: {
     flex: 1,
     flexDirection: 'row',
