@@ -9,7 +9,7 @@ import {
   TextInput,
 } from 'react-native';
 import { useAppTheme } from '../hooks/useAppTheme';
-import { mockLista } from '../data/mockData';
+import { mockListas } from '../data/mockData';
 
 type ListType = {
   id: string;
@@ -114,11 +114,19 @@ export default function HomeScreen() {
     [theme],
   );
 
-  const data: ListType[] = mockLista.map(item => ({
-    id: item.id,
-    name: item.nome,
-    total: 2,
-    bought: item.comprado ? 1 : 0,
+  // Usa mockListas, e garante array vazio se undefined
+  // Define the type for items in mockLista if not already defined
+  type MockListaItemType = {
+    id: string;
+    nome: string;
+    itens: { comprado: boolean }[];
+  };
+
+  const data: ListType[] = (mockListas ?? []).map((lista: MockListaItemType) => ({
+    id: lista.id,
+    name: lista.nome,
+    total: lista.itens.length,
+    bought: lista.itens.filter(i => i.comprado).length,
   }));
 
   function renderListItem({ item }: { item: ListType }) {
